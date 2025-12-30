@@ -4,80 +4,88 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Resolution Swap</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
 
-  body {
-    margin: 0;
-    font-family: 'Permanent Marker', cursive;
-    background: #fff7b0; /* soft yellow background */
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    overflow: hidden;
-    color: #5a3e1b; /* brown handwritten color */
-  }
+body {
+  margin: 0;
+  font-family: 'Permanent Marker', cursive;
+  background: #fff7b0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+  color: #5a3e1b;
+}
 
-  .screen {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    width: 90%;
-  }
+.screen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 90%;
+}
 
-  .active { display: flex; }
+.active { display: flex; }
 
-  h1 {
-    font-size: 2rem;
-    margin-bottom: 1rem;
-  }
+h1 { font-size: 2rem; margin-bottom: 1rem; }
 
-  input {
-    padding: 12px;
-    font-size: 1.4rem;
-    border-radius: 12px;
-    border: 2px solid #d9a400;
-    margin-bottom: 20px;
-    width: 80%;
-    text-align: center;
-    background: #fffacd;
-    box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
-  }
+input {
+  padding: 12px;
+  font-size: 1.4rem;
+  border-radius: 12px;
+  border: 2px solid #d9a400;
+  margin-bottom: 20px;
+  width: 80%;
+  text-align: center;
+  background: #fffacd;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+}
 
-  button {
-    padding: 15px 30px;
-    font-size: 1.4rem;
-    border-radius: 12px;
-    border: 2px solid #d9a400;
-    background: #ffe066;
-    cursor: pointer;
-    transition: transform 0.2s;
-    box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
-  }
+button {
+  padding: 15px 30px;
+  font-size: 1.4rem;
+  border-radius: 12px;
+  border: 2px solid #d9a400;
+  background: #ffe066;
+  cursor: pointer;
+  transition: transform 0.2s;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+}
 
-  button:active { transform: scale(0.95); }
+button:active { transform: scale(0.95); }
 
-  .lottery {
-    font-size: 1.6rem;
-    margin: 30px 0;
-    padding: 15px 30px;
-    background: #fffacd;
-    border: 2px solid #d9a400;
-    border-radius: 12px;
-    box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
-    min-width: 250px;
-  }
+.lottery {
+  font-size: 1.6rem;
+  margin: 30px 0;
+  padding: 15px 30px;
+  background: #fffacd;
+  border: 2px solid #d9a400;
+  border-radius: 12px;
+  box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+  min-width: 250px;
+  transition: transform 0.6s;
+}
 
-  p {
-    font-size: 1rem;
-    margin-top: 10px;
-  }
+p { font-size: 1rem; margin-top: 10px; }
 
+/* Confetti container */
+#confetti {
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
 </style>
 </head>
 <body>
+
+<!-- Confetti Container -->
+<canvas id="confetti"></canvas>
 
 <!-- Welcome Screen -->
 <div id="welcome" class="screen active">
@@ -106,8 +114,14 @@
   <button onclick="backToHome()">Done / Back to Home</button>
 </div>
 
+<!-- Sounds -->
+<audio id="drumroll" src="https://freesound.org/data/previews/522/522508_10368526-lq.mp3"></audio>
+<audio id="revealSound" src="https://freesound.org/data/previews/256/256113_3263906-lq.mp3"></audio>
+
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
 <script>
-// Participant list with fixed pairs
+// Participants with fixed pairs
 const participants = [
   {name: "Venus Chaudhary", assigned: "Aarush Gupta"},
   {name: "Garima Dhulia", assigned: "Vidhi Mishra"},
@@ -128,6 +142,7 @@ const participants = [
   {name: "Suruchi", assigned: "Gulshan Kumar"}
 ];
 
+// Screen functions
 function showNameEntry() {
   document.getElementById('welcome').classList.remove('active');
   document.getElementById('nameEntry').classList.add('active');
@@ -138,27 +153,48 @@ function startLottery() {
   if (!playerName) { alert("Please enter your name!"); return; }
 
   const player = participants.find(p => p.name.toLowerCase() === playerName.toLowerCase());
-  if (!player) { alert("Name not found in participants!"); return; }
+  if (!player) { alert("Name not found!"); return; }
 
   document.getElementById('nameEntry').classList.remove('active');
   document.getElementById('lotteryScreen').classList.add('active');
 
   const lotteryDiv = document.getElementById('lotteryName');
+  lotteryDiv.style.transform = "rotateX(0deg)";
+
+  // Play drumroll
+  document.getElementById('drumroll').play();
+
   let i = 0;
   const interval = setInterval(() => {
     lotteryDiv.textContent = participants[i % participants.length].name;
+    lotteryDiv.style.transform = `rotateX(${Math.random()*360}deg)`;
     i++;
   }, 100);
 
   setTimeout(() => {
     clearInterval(interval);
+    lotteryDiv.style.transform = "rotateX(0deg)";
     lotteryDiv.textContent = player.assigned;
+
+    // Stop drumroll and play reveal sound
+    document.getElementById('drumroll').pause();
+    document.getElementById('drumroll').currentTime = 0;
+    document.getElementById('revealSound').play();
+
+    // Show confetti
+    confetti({
+      particleCount: 150,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+
     setTimeout(() => {
       document.getElementById('lotteryScreen').classList.remove('active');
       document.getElementById('receiverName').textContent = player.assigned;
       document.getElementById('revealScreen').classList.add('active');
-    }, 800);
-  }, 2000);
+    }, 1000);
+
+  }, 3000);
 }
 
 function backToHome() {
