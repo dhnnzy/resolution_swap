@@ -1,0 +1,172 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resolution Swap</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap');
+
+  body {
+    margin: 0;
+    font-family: 'Permanent Marker', cursive;
+    background: #fff7b0; /* soft yellow background */
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+    color: #5a3e1b; /* brown handwritten color */
+  }
+
+  .screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 90%;
+  }
+
+  .active { display: flex; }
+
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  input {
+    padding: 12px;
+    font-size: 1.4rem;
+    border-radius: 12px;
+    border: 2px solid #d9a400;
+    margin-bottom: 20px;
+    width: 80%;
+    text-align: center;
+    background: #fffacd;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+  }
+
+  button {
+    padding: 15px 30px;
+    font-size: 1.4rem;
+    border-radius: 12px;
+    border: 2px solid #d9a400;
+    background: #ffe066;
+    cursor: pointer;
+    transition: transform 0.2s;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+  }
+
+  button:active { transform: scale(0.95); }
+
+  .lottery {
+    font-size: 1.6rem;
+    margin: 30px 0;
+    padding: 15px 30px;
+    background: #fffacd;
+    border: 2px solid #d9a400;
+    border-radius: 12px;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+    min-width: 250px;
+  }
+
+  p {
+    font-size: 1rem;
+    margin-top: 10px;
+  }
+
+</style>
+</head>
+<body>
+
+<!-- Welcome Screen -->
+<div id="welcome" class="screen active">
+  <h1>🎁 Resolution Swap 🎉</h1>
+  <button onclick="showNameEntry()">Enter Your Name</button>
+</div>
+
+<!-- Name Entry Screen -->
+<div id="nameEntry" class="screen">
+  <h1>Type Your Name</h1>
+  <input type="text" id="playerName" placeholder="Your name...">
+  <button onclick="startLottery()">Draw My Gift 🎁</button>
+</div>
+
+<!-- Lottery Screen -->
+<div id="lotteryScreen" class="screen">
+  <h1>Spinning the Lottery...</h1>
+  <div class="lottery" id="lotteryName">🎲</div>
+</div>
+
+<!-- Reveal Screen -->
+<div id="revealScreen" class="screen">
+  <h1>🎉 Your Resolution Swap Gift Is For: 🎁</h1>
+  <div id="receiverName" class="lottery" style="margin:20px 0; font-weight:bold;"></div>
+  <p>Tip: Make it fun and New Year-themed!</p>
+  <button onclick="backToHome()">Done / Back to Home</button>
+</div>
+
+<script>
+// Participant list with fixed pairs
+const participants = [
+  {name: "Venus Chaudhary", assigned: "Aarush Gupta"},
+  {name: "Garima Dhulia", assigned: "Vidhi Mishra"},
+  {name: "Vidhi Mishra", assigned: "Dhananjay Gautam"},
+  {name: "Aarush Gupta", assigned: "Humza Neyaz"},
+  {name: "Ankita Agarwal", assigned: "Shlok Kumar"},
+  {name: "Abhishek Kumar", assigned: "Suruchi"},
+  {name: "Anchit Gangwar", assigned: "Ansh Mishra"},
+  {name: "Ansh Mishra", assigned: "Ribhav Agarwal"},
+  {name: "Dhananjay Gautam", assigned: "Gloriya Singh"},
+  {name: "Gloriya Singh", assigned: "Shivang Saini"},
+  {name: "Gulshan Kumar", assigned: "Lakshay"},
+  {name: "Humza Neyaz", assigned: "Abhishek Kumar"},
+  {name: "Lakshay", assigned: "Ankita Agarwal"},
+  {name: "Ribhav Agarwal", assigned: "Anchit Gangwar"},
+  {name: "Shlok Kumar", assigned: "Garima Dhulia"},
+  {name: "Shivang Saini", assigned: "Venus Chaudhary"},
+  {name: "Suruchi", assigned: "Gulshan Kumar"}
+];
+
+function showNameEntry() {
+  document.getElementById('welcome').classList.remove('active');
+  document.getElementById('nameEntry').classList.add('active');
+}
+
+function startLottery() {
+  const playerName = document.getElementById('playerName').value.trim();
+  if (!playerName) { alert("Please enter your name!"); return; }
+
+  const player = participants.find(p => p.name.toLowerCase() === playerName.toLowerCase());
+  if (!player) { alert("Name not found in participants!"); return; }
+
+  document.getElementById('nameEntry').classList.remove('active');
+  document.getElementById('lotteryScreen').classList.add('active');
+
+  const lotteryDiv = document.getElementById('lotteryName');
+  let i = 0;
+  const interval = setInterval(() => {
+    lotteryDiv.textContent = participants[i % participants.length].name;
+    i++;
+  }, 100);
+
+  setTimeout(() => {
+    clearInterval(interval);
+    lotteryDiv.textContent = player.assigned;
+    setTimeout(() => {
+      document.getElementById('lotteryScreen').classList.remove('active');
+      document.getElementById('receiverName').textContent = player.assigned;
+      document.getElementById('revealScreen').classList.add('active');
+    }, 800);
+  }, 2000);
+}
+
+function backToHome() {
+  document.getElementById('revealScreen').classList.remove('active');
+  document.getElementById('playerName').value = '';
+  document.getElementById('welcome').classList.add('active');
+}
+</script>
+
+</body>
+</html>
